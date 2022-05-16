@@ -1,1 +1,1 @@
-# MySQL-note
+# sql-note
