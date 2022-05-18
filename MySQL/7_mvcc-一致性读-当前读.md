@@ -70,7 +70,7 @@ insert into t(id, k) values(1,1),(2,2);
 
  图1
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB_01.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB_01.png)
 
 1. 事务 A 在一个只读事务中查询，并且时间顺序上是在事务 B 的查询之后
 2. 事务 C没显式地使用 begin/commit，因为 `update 语句本身就是一个事务`，语句完成时会`自动提交`
@@ -129,7 +129,7 @@ InnoDB 利用了`“所有数据都有多个版本”`的这个特性，实现�
 
 图 2 ：一个记录被多个事务连续更新后的状态
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1_01.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1_01.png)
 
 图中`虚线框`里是`同一行数据的 4 个版本`
 
@@ -172,7 +172,7 @@ InnoDB 利用了`“所有数据都有多个版本”`的这个特性，实现�
 
 这个`视图数组`把所有的 `row trx_id `分成了几种不同的情况
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB_02.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB_02.png)
 
 `图 3 数据版本可见性规则`
 
@@ -214,7 +214,7 @@ InnoDB 利用了`“所有数据都有多个版本”`的这个特性，实现�
 
 图 4 `事务 A 查询数据逻辑图`
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB_04.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB_04.png)
 
 1. 第一个`有效更新`是事务 C，把数据从 (1,1) 改成了 (1,2)
 
@@ -266,7 +266,7 @@ update都是`先读后写的`，而这个读，只能`读当前的值`，称为`
 
 例子：图 6 事务 A、B、C'的执行流程
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1_07.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1_07.png)
 
 
 
@@ -282,7 +282,7 @@ update都是`先读后写的`，而这个读，只能`读当前的值`，称为`
 
 图 7 事务 B 更新逻辑图（配合事务 C'）
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1_08.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1_08.png)
 
 
 
@@ -309,7 +309,7 @@ update都是`先读后写的`，而这个读，只能`读当前的值`，称为`
 
 下面是`读提交`时的状态图，可以看到`这两个查询语句的创建视图数组的时机`发生了变化，就是图中的 read view 框。
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/08_%E4%BA%8B%E5%8A%A1_09.jpg)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/08_%E4%BA%8B%E5%8A%A1_09.jpg)
 
 图 8 读提交隔离级别下的事务状态图
 

@@ -42,7 +42,7 @@
 
 假设从上到下是按照时间顺序执行的，同一行语句是在同一时刻执行的
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/14_%E4%BC%9A%E8%AF%9Dabc%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/14_%E4%BC%9A%E8%AF%9Dabc%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.png)
 
 
 
@@ -150,7 +150,7 @@ count(1) 执行得要比 count(主键 id) 快
 
 先插入记录到数据库，redis再增加计数
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/14_%E4%BC%9A%E8%AF%9Dab%E6%97%B6%E5%BA%8F%E5%9B%BE2.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/14_%E4%BC%9A%E8%AF%9Dab%E6%97%B6%E5%BA%8F%E5%9B%BE2.png)
 
 1. 会话 A先往数据库插入一行记录，然后 Redis 计数加 1
 
@@ -162,7 +162,7 @@ count(1) 执行得要比 count(主键 id) 快
 
 先redis增加计数，再插入记录到数据库
 
-![](https://gitee.com/sinkhaha/picture/raw/master/img/mysql/14_ab%E6%97%B6%E5%BA%8F%E5%9B%BE3.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/14_ab%E6%97%B6%E5%BA%8F%E5%9B%BE3.png)
 
 
 
@@ -185,7 +185,7 @@ count(1) 执行得要比 count(主键 id) 快
 
 
 
-![](https://gitee.com/sinkhaha/picture/blob/master/img/mysql/14_%E4%BC%9A%E8%AF%9Dab%E6%97%B6%E5%BA%8F%E5%9B%BE4.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/14_%E4%BC%9A%E8%AF%9Dab%E6%97%B6%E5%BA%8F%E5%9B%BE4.png)
 
 
 
