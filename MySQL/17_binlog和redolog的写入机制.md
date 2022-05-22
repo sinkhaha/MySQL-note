@@ -104,13 +104,13 @@ MySQL redo log 存储状态图
 
 InnoDB 提供了` innodb_flush_log_at_trx_commit `参数控制 redo log 的写入策略，它有三种可能取值
 
-1. 设置为 0 的时候，表示每次事务提交时都只是把 redo log 留在 `redo log buffer `中 
-2. 设置为 1 的时候，表示每次事务提交时都将 redo log 直接`持久化到磁盘`
-3. 设置为 2 的时候，表示每次事务提交时都只是把 redo log 写到` page cache`
+1. 设置为 0 时，表示每次事务提交时都只是把 redo log 留在 `redo log buffer `中 
+2. 设置为 1 时，表示每次事务提交时都将 redo log 直接`持久化到磁盘`
+3. 设置为 2 时，表示每次事务提交时都只是把 redo log 写到` page cache`
 
 
 
-## redo log什么持久化到磁盘
+## redo log怎么持久化到磁盘
 
 ### 后台线程定时持久化
 
