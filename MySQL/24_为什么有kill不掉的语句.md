@@ -1,6 +1,4 @@
- 
-
-# MySQL两个 kill 命令
+#  MySQL两个 kill 命令
 
 1. 一个是 `kill query + 线程 id`
 
@@ -14,13 +12,13 @@
 
 # 背景
 
-有时使用了 kill 命令，`却没能断开这个连接`。再执行 show processlist 命令，看到这条语句的 Command 列显示的是` Killed`
+有时使用了 kill 命令，却没能断开这个连接，再执行 show processlist 命令，看到这条语句的 Command 列显示的是` Killed`
 
 
 
 1. 其实大多数情况下，`kill query/connection `命令是有效的
 
-   > 比如，执行一个查询的过程中，发现执行时间太久，要放弃继续查询，这时我们就可以用 kill query 命令，终止这条查询语句
+   > 比如，执行一个查询的过程中，发现执行时间太久，要放弃继续查询，这时可以用 kill query 命令，终止这条查询语句
 
 2. 还有一种情况是，语句处于`锁等待`的时候，直接使用 kill 命令也是有效的
 
@@ -34,7 +32,7 @@
 
 kill 并不是`马上停止`的意思，而是告诉执行线程说，这条语句已经不需要继续执行了，可以开始“执行停止的逻辑了”
 
-> 其实，这跟 Linux 的 kill 命令类似，kill -N pid 并不是让进程直接停止，而是给进程发一个信号，然后进程处理这个信号，进入终止逻辑。只是对于 MySQL 的 kill 命令来说，不需要传信号量参数，就只有“停止”这个命令
+> 其实，这跟 Linux 的 kill 命令类似，kill -N pid 并不是让进程直接停止，而是给进程发一个信号，然后进程处理这个信号
 
 
 
@@ -63,7 +61,7 @@ kill 并不是`马上停止`的意思，而是告诉执行线程说，这条语�
 1. sesssion C 执行的时候被堵住了
 2. 但是 session D 执行的 `kill query C 命令却没什么效果`
 3. 直到 session E 执行了` kill connection 命令`，才断开了 session C 的连接，提示“Lost connection to MySQL server during query”
-4. 但是这时候，如果在 session E 中执行 show processlist，你就能看到下面这个图
+4. 但这时，如果在 session E 中执行 show processlist，你就能看到下面这个图
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/20210711214401.png)
 
@@ -116,7 +114,7 @@ kill 并不是`马上停止`的意思，而是告诉执行线程说，这条语�
 
 
 
-# **另外两个关于客户端的误解**
+# **两个关于客户端的误解**
 
 **第一个误解是：如果库里面的表特别多，连接就会很慢**
 
