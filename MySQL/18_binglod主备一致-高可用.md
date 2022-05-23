@@ -4,6 +4,8 @@
 
 ## 主备切换流程
 
+M-S架构
+
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/24_MySQL%20%E4%B8%BB%E5%A4%87%E5%88%87%E6%8D%A2%E6%B5%81%E7%A8%8B)
 
 
@@ -294,13 +296,13 @@ mysqlbinlog master.000001  --start-position=2738 --stop-position=2973 | mysql -h
 
 
 
-# 循环复制问题
+# 双主循环复制问题
 
-通过上面对 MySQL 中 binlog 基本内容的理解，你现在可以知道，binlog 的特性确保了在备库执行相同的 binlog，可以得到与主库相同的状态。
+binlog 的特性确保了在备库执行相同的 binlog，可以得到与主库相同的状态。因此，我们可以认为正常情况下M-S架构下的主备的数据是一致的。
 
 
 
-因此，我们可以认为正常情况下主备的数据是一致的。也就是说，图 1 中 A、B 两个节点的内容是一致的。其实，图 1 中我画的是 M-S 结构，但实际生产上使用比较多的是双 M 结构，也就是图 9 所示的主备切换流程。
+实际生产上使用比较多的是双 M 结构，也就是图 9 所示的主备切换流程。
 
 
 
@@ -308,9 +310,7 @@ mysqlbinlog master.000001  --start-position=2738 --stop-position=2973 | mysql -h
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/20210710161518.png)
 
-
-
-对比图 9 和图 1，你可以发现，双 M 结构和 M-S 结构，其实区别只是多了一条线，即：节点 A 和 B 之间总是互为主备关系。这样在切换的时候就不用再修改主备关系。
+双 M 结构和 M-S 结构，其实区别只是多了一条线，即：节点 A 和 B 之间总是互为主备关系。这样在切换的时就不用再修改主备关系。
 
 
 
@@ -339,14 +339,6 @@ mysqlbinlog master.000001  --start-position=2738 --stop-position=2973 | mysql -h
 1. 从节点 A 更新的事务，binlog 里面记的都是 A 的 server id；
 2. 传到节点 B 执行一次以后，节点 B 生成的 binlog 的 server id 也是 A 的 server id；
 3. 再传回给节点 A，A 判断到这个 server id 与自己的相同，就不会再处理这个日志。所以，死循环在这里就断掉了
-
-
-
-// TODO
-
-
-
-
 
 
 
