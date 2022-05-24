@@ -35,6 +35,8 @@ insert into t2(c,d) select c,d from t;
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/20210714225845.png)
 
+
+
 实际的执行效果是：如果 session B 先执行，由于这个语句对表 t `主键索引加了 (-∞,1]`这个 next-key lock，会在语句执行完成后，`才允许 session A 的 insert 语句`执行。
 
 
@@ -236,7 +238,7 @@ insert into t values(11,10,10) on duplicate key update d=100;
 
 现在表 t 里面已经有了 (1,1,1) 和 (2,2,2) 这两行，我们再来看看下面这个语句执行的效果：
 
-![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/20210714230851.png)
+![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql20210714230851.png)
 
 `图 9 两个唯一键同时冲突`
 
