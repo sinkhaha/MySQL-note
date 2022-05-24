@@ -20,9 +20,9 @@ call idata();
 
 
 
-# union 执行流程
+# union执行流程
 
-执行下面语句，用到了 union，语义是取这两个子查询结果的并集(就是这两个集合加起来，`重复的行只保留一行`)
+执行下面语句，用到了 union，语义是取这两个子查询结果的并集(就是这两个集合加起来，重复的行只保留一行)
 
 ```sql
 (select 1000 as f) union (select id from t1 order by id desc limit 2);
@@ -34,8 +34,8 @@ call idata();
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/20210713223410.png)
 
-* 第二行的 `key=PRIMARY`，说明第二个子句用到了`索引 id`
-* 第三行的` Extra 字段`，表示在对子查询的结果集做 union 时，使用了`临时表 (Using temporary)`
+* 第二行的 `key=PRIMARY`，说明第二个子句用到了`索引id`
+* 第三行的` Extra字段`，表示在对子查询的结果集做 union 时，使用了`临时表 (Using temporary)`
 
 
 
@@ -59,6 +59,8 @@ call idata();
 
 
 如果把上面这个语句中的 union 改成 `union all `，就没有了“去重”的语义。
+
+
 
 这样执行时就`依次执行子查询`，得到的结果直接作为结果集的一部分，发给客户端。因此也就`不需要临时表`了。
 
