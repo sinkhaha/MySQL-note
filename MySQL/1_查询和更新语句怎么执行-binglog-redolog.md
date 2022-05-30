@@ -23,7 +23,7 @@
 
 1. `show create table 表名`
 2. `show table status from 库名 where name='表名'`
-3. ``select * from information_schema.tables where table_schema='库名' and table_name='表名'`
+3. `select * from information_schema.tables where table_schema='库名' and table_name='表名'`
 
 
 
