@@ -13,7 +13,7 @@
 1. 掌柜的记忆 -> 内存
 2. 粉板 -> 日志文件(redo log)
 
-3. 掌柜记账的账本 -> 数据文件
+3. 掌柜记账的账本 -> 磁盘数据文件
 
 
 
@@ -89,7 +89,7 @@
 
 
 
-### 第2种场景：redo log满了
+### 第2种场景：redo log满了(尽量避免)
 
 InnoDB 的 redo log 写满了，则需要把一些redo log记录到磁盘，这时系统会`停止所有更新操作`，把 checkpoint 往前推进，便于redo log 留出空间可以继续写。
 
@@ -116,14 +116,14 @@ MySQL 正常关闭时，MySQL 会把内存的脏页都 flush 到磁盘上，这�
 ### 性能影响对比
 
 1. MySQL空闲跟关闭，没什么性能影响
-2. 内存不够用了，要flush，这种情况其实是常态。
-3. redo log 写满了，要flush，这种情况是 InnoDB 要尽量避免的。
+2. 内存不够用了，要flush，这种情况其实是常态
+3. redo log 写满了，要flush，这种情况是 InnoDB 要尽量避免的
 
 > 因为出现redo log写满时，整个系统就不能再接受更新了，所有的更新都必须堵住。此时候更新数会跌为 0
 
 
 
-#### Buffer pool缓冲池
+### Buffer pool缓冲池
 
 InnoDB 用缓冲池（buffer pool）管理内存，缓冲池中的`内存页有三种状态`：
 
@@ -186,7 +186,7 @@ fio -filename=$filename -direct=1 -iodepth 1 -thread -rw=randrw -ioengine=psync 
 
 
 
-## InnoDB 怎么控制引擎按照“全力”的百分比来刷脏
+## InnoDB怎么控制引擎按照“全力”的百分比来刷脏
 
 **InnoDB 的刷盘速度要参考的两个因素**
 
@@ -214,19 +214,17 @@ F1(M)
 }
 ```
 
-InnoDB 每次写入的日志都有一个`序`号，`当前写入的序号`跟` checkpoint 对应的序号`之间的差值，我们假设为 N。InnoDB 会根据这个 N 算出一个范围在 0 到 100 之间的数字，这个计算公式可以记为` F2(N)`。
+InnoDB 每次写入的日志都有一个序号，`当前写入的序号`跟` checkpoint对应的序号`之间的差值，我们假设为 N。InnoDB 会根据这个 N 算出一个范围在 0 到 100 之间的数字，这个计算公式可以记为` F2(N)`。
 
-F2(N) 算法比较复杂，你只要知道` N 越大，算出来的值越大`就好了。
-
-
-
-然后，根据上述算得的 F1(M) 和 F2(N) 两个值，`取其中较大的值记为 R`，之后引擎就可以按照` innodb_io_capacity 定义的能力 乘以 R% `来控制刷脏页的速度。
+F2(N) 算法比较复杂，你只要知道 N 越大，算出来的值越大就好了。
 
 
 
-一个简单的流程图
+然后，根据上述算得的 F1(M) 和 F2(N) 两个值，`取其中较大的值记为 R`，之后引擎就可以按照` innodb_io_capacity 定义的能力 乘以 R% 来控制刷脏页的速度`。
 
-图中的 F1、F2 就是上面我们通过脏页比例和 redo log 写入速度算出来的两个值。
+
+
+一个简单的流程图，图中的 F1、F2 就是上面我们通过脏页比例和 redo log 写入速度算出来的两个值。
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/12_InnoDB%E5%88%B7%E8%84%8F%E9%A1%B5%E9%80%9F%E5%BA%A6%E7%AD%96%E7%95%A5.jpeg)
 
@@ -234,13 +232,13 @@ InnoDB 会在后台刷脏页，而`刷脏页的过程是要将内存页写入磁
 
 
 
-要尽量避免这种情况，就要合理地设置 `innodb_io_capacity 的值`，并且平时要多关注`脏页比例`，不要让它经常接近 `75%`。
+要尽量避免这种情况，就要合理地设置 `innodb_io_capacity 的值`，并且平时要多关注`脏页比例`，不要让它经常接近 75%。
 
 
 
 **得到脏页比例**
 
-其中，`脏页比例是通过 Innodb_buffer_pool_pages_dirty/Innodb_buffer_pool_pages_total 得到的`，
+其中，`脏页比例是通过 Innodb_buffer_pool_pages_dirty/Innodb_buffer_pool_pages_total 得到的`。
 
 具体的命令参考下面的代码：
 
