@@ -8,8 +8,8 @@ CREATE TABLE `t` (
   `name` varchar(16) NOT NULL,
   `age` int(11) NOT NULL,
   `addr` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`), // id为主键索引 
-  KEY `city` (`city`) // city为普通索引
+  PRIMARY KEY (`id`), -- id为主键索引 
+  KEY `city` (`city`) -- city为普通索引
 ) ENGINE=InnoDB;
 ```
 
@@ -51,13 +51,13 @@ select city,name,age from t where city='杭州' order by name limit 1000 ;
 
 这个语句执行流程如下 ：
 
-1. `初始化sort_buffer`，确定要放入` name、city、age `这三个字段
-2. 从索引 city 找到`第一个满足 city='杭州’`条件的`主键 id`，即图中的 ID_X
-3. 到`主键 id 索引取出整行`，取 name、city、age 三个字段的值，`存入 sort_buffer 中`
+1. 初始化sort_buffer，确定要放入` name、city、age `这三个字段
+2. 从索引 city 找到`第一个满足 city='杭州’`条件的`主键id`，即图中的 ID_X
+3. 到`主键id 索引取出整行`，取 name、city、age 三个字段的值，`存入 sort_buffer 中`
 4. 从索引 city 取下一个记录的主键 id
 5. `重复步骤 3、4 `直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的 ID_Y
 6. 对 sort_buffer 中的数据`按照字段 name 做快速排序`
-7. 按照排序结果`取前 1000 行`返回给客户端
+7. 按照排序结果`取前1000 行`返回给客户端
 
 把这个排序过程，称为`全字段排序`
 
@@ -67,7 +67,7 @@ select city,name,age from t where city='杭州' order by name limit 1000 ;
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/16_%E5%85%A8%E5%AD%97%E6%AE%B5%E6%8E%92%E5%BA%8F)
 
-图中`“按 name 排序”`可能在内存中完成，也可能需要使用`外部排序`，这取决于`排序所需的内存和参数 sort_buffer_size`
+图中`“按 name 排序”`可能在内存中完成，也可能需要使用`外部排序`，这取决于排序所需的内存和参数 sort_buffer_size
 
 
 
@@ -197,7 +197,7 @@ city、name、age 这三个字段的定义总长度是36
 SET max_length_for_sort_data = 16;
 ```
 
-新的rowid算法放入 `sort_buffer `的字段，只有要`排序的列（即 name 字段）和主键 id`
+新的rowid算法放入 sort_buffer 的字段，只有要`排序的列（即 name 字段）和主键 id`
 
 > 但排序的结果因为少了 city 和 age 字段的值，不能直接返回了
 
@@ -207,7 +207,7 @@ SET max_length_for_sort_data = 16;
 
 1. 初始化 sort_buffer，确定放入两个字段，即` name 和 id`
 
-2. 从索引 city 找到`第一个满足 city='杭州’条件的主键 id`，也就是图中的 ID_X
+2. 从索引 city 找到`第一个满足 city='杭州’条件的主键id`，也就是图中的 ID_X
 
 3. 到主键 id 索引取出整行，取 `name、id 这两个字段`，存入 sort_buffer 中
 
@@ -220,18 +220,19 @@ SET max_length_for_sort_data = 16;
 7. 遍历排序结果，取前 1000 行，并`按照 id 的值回到原表中取出 city、name 和 age 三个字段`返回给客户端
 
 
-把这个过程称为 `rowid 排序`
+把这个过程称为 `rowid 排序`。
 
 > 注意：最后的`“结果集”`是一个逻辑概念，实际上 MySQL 服务端从排序后的 sort_buffer 中依次取出 id，然后到原表查到 city、name 和 age 这三个字段的结果，不需要在服务端再耗费内存存储结果，是直接返回给客户端的。
->
+
+
+
+跟`全字段排序`的区别是，rowid 排序多访问了一次表 t 的主键索引，就是最后一步的步骤 7
 
 
 
 这个执行流程的示意图如下
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/16_rowid%E6%8E%92%E5%BA%8F)
-
-跟`全字段排序`的区别是，rowid 排序多访问了一次表 t 的主键索引，就是最后一步的步骤 7
 
 
 
@@ -243,11 +244,11 @@ SET max_length_for_sort_data = 16;
 
 首先，图中的 examined_rows 的值还是 4000，表示用于排序的数据是 4000 行。但是 select @b-@a 这个语句的值变成 5000 了。
 
-因为这时候除了排序过程外，在排序完成后，还要根据 id 去原表取值。由于语句是 limit 1000，因此会`多读 1000 行`。
+因为这时候除了排序过程外，在排序完成后，还要根据 id 去原表取值。由于语句是 limit 1000，因此会多读 1000 行。
 
 
 
-rowid 排序的 OPTIMIZER_TRACE 部分输出如下
+rowid 排序的 OPTIMIZER_TRACE 部分输出如下：
 
 ![](https://sink-blog-pic.oss-cn-shenzhen.aliyuncs.com/img/mysql/16_rowid%E6%8E%92%E5%BA%8F%E7%9A%84OPTIMIZER_TRACE%E9%83%A8%E5%88%86%E8%BE%93%E5%87%BA)
 
@@ -264,7 +265,7 @@ rowid 排序的 OPTIMIZER_TRACE 部分输出如下
 
 ## 区别
 
-1. MySQL担心`排序内存太小`，会影响排序效率，才会采用` rowid 排序算法`，这样排序过程中一次可以排序更多行，但是`需要再回到原表去取数据`
+1. MySQL担心排序内存太小，会影响排序效率，才会采用` rowid 排序算法`，这样排序过程中一次可以排序更多行，但是`需要再回到原表去取数据`
 
 2. MySQL认为内存足够大，会优先选择`全字段排序`，把需要的字段都放到 sort_buffer 中，这样排序后就会直接从内存里面返回查询结果了，不用再回到原表去取数据
 
@@ -278,7 +279,7 @@ rowid 排序的 OPTIMIZER_TRACE 部分输出如下
 
 ## **order by不一定有排序操作**
 
-MySQL 做排序是一个`成本比较高`的操作，并不是所有的 order by 语句，都需要排序操作的。
+MySQL 做排序是一个成本比较高的操作，并不是所有的 order by 语句，都需要排序操作的。
 
 
 
@@ -305,7 +306,7 @@ alter table t add index city_user(city, name);
 整个查询过程的流程：
 
 1. 从索引 (city,name) 找到`第一个满足 city='杭州’`条件的主键 id
-2. 到主键 id 索引取出整行，取 `name、city、age `三个字段的值，作为结果集的一部分`直接返回`
+2. 到主键 id 索引取出整行，取 `name、city、age `三个字段的值，作为结果集的一部分直接返回
 3. 从索引 (city,name) 取下一个记录主键 id
 4. `重复步骤 2、3`，直到查到第 1000 条记录，或者是`不满足 city='杭州’`条件时循环结束
 
@@ -343,11 +344,13 @@ alter table t add index city_user_age(city, name, age);
 
 
 
-对于` city 字段的值相同`的行来说，还是按照 name 字段的值`递增排`序的，此时的查询语句也就不再需要排序了。
+对于` city字段的值相同`的行来说，还是按照 name 字段的值`递增排`序的，此时的查询语句也就不再需要排序了。
+
+
 
 这样执行流程就变成了：
 
-1. 从索引 (city,name,age) 找到第一个满足` city='杭州’`条件的记录，取出其中的 city、name 和 age 这三个字段的值，作为结果集的一部分`直接返回`
+1. 从索引 (city,name,age) 找到第一个满足` city='杭州’`条件的记录，取出其中的 city、name 和 age 这三个字段的值，作为结果集的一部分直接返回
 
 2. 从`索引 (city,name,age) 取下一个记录`，同样取出这三个字段的值，作为结果集的一部分`直接返回`
 
@@ -369,15 +372,15 @@ Extra 字段里面多了`“Using index”`，表示的就是使用了覆盖索�
 
 
 
-# 获取随机消息-临时表
+# 怎么获取随机消息-临时表
 
 ## 背景
 
-一个英语学习 App 首页有一个随机显示单词的功能，也就是根据每个用户的级别有一个单词表，然后这个用户每次访问首页的时候，都会随机滚动显示三个单词。他们发现随着单词表变大，选单词这个逻辑变得越来越慢，甚至影响到了首页的打开速度。
+一个英语学习 App 首页有一个随机显示单词的功能，也就是根据每个用户的级别有一个单词表，然后这个用户每次访问首页时，都会随机滚动显示三个单词。他们发现随着单词表变大，选单词这个逻辑变得越来越慢，甚至影响到了首页的打开速度。
 
 
 
-SQL语句要如何写呢
+SQL语句要如何写呢？
 
 
 
@@ -388,14 +391,14 @@ SQL语句要如何写呢
 这个表的建表语句和初始数据的命令如下：
 
 ```sql
-// 建表
+-- 建表
 CREATE TABLE `words` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `word` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
-// 插入10000条记录
+-- 插入10000条记录
 delimiter ;;
 create procedure idata()
 begin
@@ -433,15 +436,15 @@ select word from words order by rand() limit 3;
 
 **Extra字段表示需要临时表，并且需要在临时表上排序**
 
-1.  `Using temporary`，表示的是需要使用`临时表`
+1.  Using temporary：表示的是需要使用`临时表`
 
-2.  `Using filesort`，表示的是需要`执行排序`操作
+2.  Using filesort：表示的是需要`执行排序`
 
 
 
 对于内存表，回表过程只是简单地根据数据行的位置，直接访问内存得到数据，根本不会导致多访问磁盘。
 
-优化器没有了这一层顾虑，那么它会优先考虑的，就是`用于排序的行越小越好`了，所以，MySQL 这时就会选择` rowid 排序`。
+优化器没有了这一层顾虑，那么它会优先考虑的，就是`用于排序的行越小越好`了，所以，MySQL 这时就会选择` rowid排序`。
 
 
 
@@ -453,7 +456,7 @@ order by rand() 使用了`内存临时表`，内存临时表排序的时候使�
 
 1. 创建一个临时表
 
-   > 这个临时表使用的是 `memory 引擎`，表里有两个字段，第一个字段是 double 类型，为了后面描述方便，记为字段 R，第二个字段是 varchar(64) 类型，记为字段 W。并且，这个表没有建索引
+   > 这个临时表使用的是 `memory引擎`，表里有两个字段，第一个字段是 double 类型，为了后面描述方便，记为字段 R，第二个字段是 varchar(64) 类型，记为字段 W。并且，这个表没有建索引
 
 2. 从 words 表中，按主键顺序取出所有的 word 值。对于每一个 word 值，调用 rand() 函数生成一个大于 0 小于 1 的随机小数，并把这个随机小数和 word 分别存入临时表的 R 和 W 字段中，到此，`扫描行数是 10000`
 
@@ -491,7 +494,7 @@ select word from words order by rand() limit 3;
 
 
 
-图中的 pos 就是`位置信息`，这里的“位置信息”是个什么概念？在上一篇文章中，我们对 InnoDB 表排序的时候，明明用的还是 ID 字段。
+图中的 pos 就是`位置信息`。
 
 
 
@@ -501,7 +504,7 @@ innodb用`rowid`来唯一标识数据行
 
 1. 对于有主键的innodb，rowid就是主键
 2. 对于没有主键的innodb，rowid由`系统生成`一个长度为 6 字节的 rowid 来作为主键
-3. MEMORY 引擎不是索引组织表。在这个例子里，可以认为它就是一个`数组`。因此，这个 rowid 其实就是`数组的下标`。 对于Memory引擎，rowid就是数组下标。
+3. MEMORY 引擎不是索引组织表。在这个例子里，可以认为它就是一个数组。因此，这个 rowid 其实就是`数组的下标`。 对于Memory引擎，rowid就是数组下标。
 
 
 
@@ -563,7 +566,7 @@ SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G
 
 **接下来，看看为什么没有使用临时文件的算法，也就是归并排序算法，而是采用了优先队列排序算法。**
 
-我们现在的 SQL 语句，只需要`取 R 值最小的 3 个 rowid`。但是，如果使用归并排序算法的话，虽然最终也能得到前 3 个值，但是这个算法结束后，已经将 10000 行数据都排好序了。
+我们现在的 SQL 语句，只需要`取R值最小的 3 个 rowid`。但是，如果使用归并排序算法的话，虽然最终也能得到前 3 个值，但是这个算法结束后，已经将 10000 行数据都排好序了。
 
 也就是说，后面的 9997 行也是有序的了。但我们的查询并不需要这些数据是有序的。所以这浪费了非常多的计算量。
 
@@ -589,17 +592,17 @@ OPTIMIZER_TRACE 结果中，filesort_priority_queue_optimization 这个部分的
 
 
 
-这个流程结束后，我们构造的堆里面，就是`这个 10000 行里面 R 值最小的三行`。然后，依次把它们的 rowid 取出来，去`临时表`里面拿到 word 字段，这个过程就跟上一篇文章的` rowid 排序`的过程一样了。
+这个流程结束后，我们构造的堆里面，就是`这个 10000 行里面 R 值最小的三行`。然后，依次把它们的 rowid 取出来，去`临时表`里面拿到 word 字段，这个过程就跟`rowid 排序`的过程一样了。
 
 
 
-看上面的SQL 查询语句：
+看下之前的SQL 查询语句：
 
 ```sql
 select city,name,age from t where city='杭州' order by name limit 1000;
 ```
 
-这里也用到了 limit，为什么没用优先队列排序算法呢？原因是，这条 SQL 语句是 limit 1000，如果使用优先队列算法的话，需要维护的堆的大小就是 1000 行的 (name,rowid)，超过了我设置的 sort_buffer_size 大小，所以只能使用归并排序算法。
+这里也用到了 limit，为什么没用优先队列排序算法呢？原因是，这条 SQL 语句是 limit 1000，如果使用优先队列算法的话，需要维护的堆的大小就是 1000 行的 (name,rowid)，超过了我们设置的 sort_buffer_size 大小，所以只能使用归并排序算法。
 
 
 
@@ -671,7 +674,7 @@ execute stmt;
 DEALLOCATE prepare stmt;
 ```
 
-由于 limit 后面的参数不能直接跟变量，所以我在上面的代码中使用了` prepare + execute` 的方法。你也可以把拼接 SQL 语句的方法写在应用程序中，会更简单些。
+由于 limit 后面的参数不能直接跟变量，所以在上面的代码中使用了` prepare + execute` 的方法。
 
 
 
@@ -685,7 +688,7 @@ DEALLOCATE prepare stmt;
 
 
 
-按照方法 2 的思路，如果要随机取 3 个 word 值，流程如下
+**按照方法 2 的思路，如果要随机取 3 个 word 值，流程如下**
 
 1. 取得整个表的行数，记为 C
 2. 根据相同的随机方法得到 Y1、Y2、Y3
